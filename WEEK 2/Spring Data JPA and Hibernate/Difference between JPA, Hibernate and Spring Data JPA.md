@@ -15,119 +15,140 @@ Common Annotations
 
 @Table
 
-@Id
+# Difference Between JPA, Hibernate, and Spring Data JPA
 
-@Column
+## Overview
 
-@GeneratedValue
+JPA, Hibernate, and Spring Data JPA are related, but they play different roles:
+
+- JPA defines the standard.
+- Hibernate implements the standard.
+- Spring Data JPA reduces boilerplate on top of JPA and Hibernate.
+
+## JPA (Java Persistence API)
+
+### Definition
+
+JPA is a Java specification (JSR 338) that defines a standard way to map Java objects to database tables. It is not an implementation by itself.
+
+### Key Points
+
+- Standard specification
+- Not a framework
+- Does not contain actual runtime code
+- Defines interfaces and annotations
+- Requires an implementation such as Hibernate
+
+### Common Annotations
+
+- @Entity
+- @Table
+- @Id
+- @Column
+- @GeneratedValue
 
 These annotations are defined by JPA.
 
-2. Hibernate
-Definition
+## Hibernate
 
-Hibernate is an ORM Framework that implements JPA. It provides the actual functionality to communicate with the database and perform CRUD operations.
+### Definition
 
-Responsibilities
-Object-Relational Mapping
-SQL generation
-Caching
-Lazy Loading
-Transaction Management
-Query Language (HQL)
-Example
+Hibernate is an ORM framework that implements JPA. It provides the actual functionality needed to communicate with the database and perform CRUD operations.
 
-Without Hibernate (JDBC)
+### Responsibilities
 
+- Object-relational mapping
+- SQL generation
+- Caching
+- Lazy loading
+- Transaction management
+- Query language support with HQL
+
+### Example
+
+#### Without Hibernate (JDBC)
+
+```java
 Connection con = DriverManager.getConnection(...);
 
 PreparedStatement ps =
-con.prepareStatement("INSERT INTO STUDENT VALUES(?,?)");
+        con.prepareStatement("INSERT INTO STUDENT VALUES(?,?)");
 
 ps.executeUpdate();
+```
 
-Lots of code.
+This requires more boilerplate code.
 
-With Hibernate
+#### With Hibernate
 
+```java
 session.save(student);
+```
 
-Just one line.
+This is much shorter and simpler.
 
-3. Spring Data JPA
-Definition
+## Spring Data JPA
 
-Spring Data JPA is a Spring module built on top of JPA. It does not implement JPA itself but provides an additional abstraction that removes most of the boilerplate code required when using JPA/Hibernate. It also simplifies transaction management.
+### Definition
 
-Responsibilities
-Generates repository implementations automatically
-Reduces boilerplate code
-Automatically manages transactions (with @Transactional)
-Provides built-in CRUD methods
+Spring Data JPA is a Spring module built on top of JPA. It does not implement JPA itself, but it adds an abstraction layer that removes most of the boilerplate required when using JPA and Hibernate.
 
-Example Repository
+### Responsibilities
 
+- Generates repository implementations automatically
+- Reduces boilerplate code
+- Simplifies transaction handling with @Transactional
+- Provides built-in CRUD methods
+
+### Example Repository
+
+```java
 @Repository
-public interface StudentRepository
-        extends JpaRepository<Student,Integer>{
-
+public interface StudentRepository extends JpaRepository<Student, Integer> {
 }
+```
 
-Now we automatically get:
+With this interface, we automatically get:
 
-save()
+- save()
+- findAll()
+- findById()
+- deleteById()
+- count()
+- existsById()
 
-findAll()
+No SQL or repository implementation code is needed for these basic operations.
 
-findById()
+## Layered Architecture
 
-deleteById()
-
-count()
-
-existsById()
-
-without writing SQL.
-
-Visual Architecture
-
+```text
 Application
-
-       │
-
-       ▼
-
+       |
+       v
 Spring Data JPA
-
-       │
-
-       ▼
-
+       |
+       v
 JPA Specification
-
-       │
-
-       ▼
-
+       |
+       v
 Hibernate
-
-       │
-
-       ▼
-
+       |
+       v
 Database
+```
 
-Think of it like layers:
+### How the layers work
 
-Spring Data JPA makes development easier.
-JPA defines the standard.
-Hibernate implements that standard.
-Hibernate communicates with the database.
-Example Comparison
-Using Hibernate
+- Spring Data JPA makes development easier.
+- JPA defines the standard.
+- Hibernate implements that standard.
+- Hibernate communicates with the database.
 
-You manually manage the session and transaction:
+## Example Comparison
 
+### Using Hibernate Directly
+
+```java
 Session session = factory.openSession();
 
 Transaction tx = session.beginTransaction();
@@ -137,18 +158,21 @@ session.save(employee);
 tx.commit();
 
 session.close();
+```
 
-As shown in your Deep Skilling notes, you explicitly open a session, begin a transaction, save the entity, commit, and close the session.
+Here you manually open the session, begin the transaction, save the entity, commit, and close the session.
 
-Using Spring Data JPA
+### Using Spring Data JPA
+
+```java
 @Autowired
 EmployeeRepository repository;
 
 @Transactional
-public void addEmployee(Employee employee){
-
-    repository.save(employee);
-
+public void addEmployee(Employee employee) {
+       repository.save(employee);
 }
+```
 
-Spring automatically manages the transaction and the repository implementation, so the code is much shorter
+Spring handles the transaction and repository implementation, so the code is much shorter.
+
